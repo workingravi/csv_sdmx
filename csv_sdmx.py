@@ -1,9 +1,11 @@
-import os, sys
-from flask import Flask, render_template, request, redirect, flash, url_for, render_template_string, session
+import os
+from conv import conv
+from flask import Flask, render_template, request, redirect, flash, url_for, send_file, session
 from werkzeug.utils import secure_filename
 
-ALLOWED_EXTENSIONS = set(['csv', 'pdf',])
-UPLOAD_FOLDER = './static'
+ALLOWED_EXTENSIONS = set(['csv',])
+UPLOAD_FOLDER = os.path.dirname(__file__) + '/static'
+op_filename = ""
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -15,7 +17,14 @@ def allowed_file(filename):
 
 @app.route('/')
 def main():
-    return render_template("index.html")
+    return render_template("convert.html")
+
+@app.route('/download', methods=['GET','POST'])
+def handle_download():
+    op_filename = app.config['OUTPUT_FILE']
+    if op_filename != "":
+        return send_file(op_filename, as_attachment=True)
+
 
 @app.route('/upload', methods=['GET','POST'])
 def handle_upload():
@@ -39,13 +48,19 @@ def handle_upload():
             return redirect(url_for('main'))
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            csvfilename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(csvfilename)
+            # generate the input and output filename with .xml extension
+            file_firstname = filename.rsplit('.', 1)[0]
+            opfilename = file_firstname + '.xml'
+            opfilename =os.path.join(app.config['UPLOAD_FOLDER'], opfilename)
+            app.config['OUTPUT_FILE'] = opfilename
+            # call function to convert
+            conv(csvfilename, opfilename)
             return render_template("upload.html", filename=filename)
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
 
 
 

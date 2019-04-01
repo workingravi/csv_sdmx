@@ -1,11 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Upload File</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='main.css') }}">
 </head>
 <body>
-    File {{ filename }} uploaded successfully!!
+    <h3>
+    File {{ filename }} uploaded and converted successfully!!
+        </h3>
+
+    <br />
+
+    Click the button below to download your converted SDMX-ML file:
+    <br>
+        <br />
+    <form action="/download" method="GET" >
+        <input type="submit" value="Download Converted File" />
+    </form>
 
 </body>
 </html>
